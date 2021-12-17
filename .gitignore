@@ -1,0 +1,6 @@
+/build/
+/.idea/
+/.gradle/
+database.env
+/src/main/kotlin/com/example/repository/configuration
+
