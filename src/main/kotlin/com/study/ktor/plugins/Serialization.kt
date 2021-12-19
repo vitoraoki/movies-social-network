@@ -2,18 +2,15 @@ package com.study.ktor.plugins
 
 import io.ktor.application.*
 import io.ktor.features.*
-import io.ktor.response.*
-import io.ktor.routing.*
 import io.ktor.serialization.*
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
 
+@ExperimentalSerializationApi
 fun Application.configureSerialization() {
     install(ContentNegotiation) {
-        json()
-    }
-
-    routing {
-        get("/json/kotlinx-serialization") {
-                call.respond(mapOf("hello" to "world"))
-            }
+        json(Json {
+            explicitNulls = false
+        })
     }
 }
