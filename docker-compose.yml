@@ -1,0 +1,17 @@
+# docker-compose.yml
+version: '3'
+services:
+  database:
+    image: "postgres:14.1"
+    env_file:
+      - database.env # postgres configuration - create your own file
+    volumes:
+      - database-data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    deploy:
+      resources:
+        limits:
+          memory: 4g
+volumes:
+  database-data:
