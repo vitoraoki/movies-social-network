@@ -1,7 +1,6 @@
 package com.study.ktor.repository
 
-import com.study.ktor.plugins.exception.SignupFailedException
-import com.study.ktor.plugins.exception.UserAlreadySignedUpException
+import com.study.ktor.plugins.result.UserSignupResult
 import com.study.ktor.plugins.route.model.UserSignup
 import com.study.ktor.repository.configuration.DRIVER
 import com.study.ktor.repository.configuration.PASSWORD
@@ -24,24 +23,29 @@ object UsersRepository {
         Users.selectAll().map { Users.toUser(it) }
     }
 
-    fun signupUser(userSignup: UserSignup) {
+    fun signupUser(userSignup: UserSignup): UserSignupResult {
         val isUserAlreadySignedUp = isUserAlreadySignedUp(userSignup.email)
 
-        if (isUserAlreadySignedUp) {
-            throw UserAlreadySignedUpException
+        return if (isUserAlreadySignedUp) {
+            UserSignupResult.UserAlreadySignedUp
         } else {
-            try {
-                transaction {
-                    Users.insertAndGetId {
-                        it[firstName] = userSignup.firstName
-                        it[secondName] = userSignup.secondName
-                        it[email] = userSignup.email
-                        it[password] = Cryptography.sha512(userSignup.password)
-                    }
-                }
-            } catch (exception: IllegalStateException) {
-                throw SignupFailedException
+            createUser(userSignup)
+        }
+    }
+
+    private fun createUser(userSignup: UserSignup): UserSignupResult {
+        return try {
+            val userId = transaction {
+                Users.insertAndGetId {
+                    it[firstName] = userSignup.firstName
+                    it[secondName] = userSignup.secondName
+                    it[email] = userSignup.email
+                    it[password] = Cryptography.sha512(userSignup.password)
+                }.value
             }
+            UserSignupResult.UserSignupSuccess(id = userId)
+        } catch (exception: IllegalStateException) {
+            UserSignupResult.SignupFailed
         }
     }
 

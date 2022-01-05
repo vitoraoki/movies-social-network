@@ -1,7 +1,6 @@
 package com.study.ktor.plugins.route
 
-import com.study.ktor.plugins.exception.SignupFailedException
-import com.study.ktor.plugins.exception.UserAlreadySignedUpException
+import com.study.ktor.plugins.result.UserSignupResult
 import com.study.ktor.plugins.route.model.UserSignup
 import com.study.ktor.repository.UsersRepository
 import io.ktor.application.*
@@ -34,13 +33,17 @@ fun Route.usersRoute() {
 private suspend fun PipelineContext<Unit, ApplicationCall>.signup() {
     try {
         val userSignup = call.receive<UserSignup>()
-        UsersRepository.signupUser(userSignup)
-        call.respond(HttpStatusCode.Created)
-    } catch (userAlreadySignedUp: UserAlreadySignedUpException) {
-        userAlreadySignedUp()
-    } catch (signupFailed: SignupFailedException) {
-        signupFailed()
+        val result = UsersRepository.signupUser(userSignup)
+        handleSignupResult(result)
     } catch (exception: SerializationException) {
         wrongUserSignupBody()
+    }
+}
+
+private suspend fun PipelineContext<Unit, ApplicationCall>.handleSignupResult(result: UserSignupResult) {
+    when (result) {
+        is UserSignupResult.UserSignupSuccess -> call.respond(HttpStatusCode.Created)
+        is UserSignupResult.UserAlreadySignedUp -> userAlreadySignedUp()
+        is UserSignupResult.SignupFailed -> signupFailed()
     }
 }
