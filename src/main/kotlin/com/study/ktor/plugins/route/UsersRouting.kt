@@ -2,6 +2,7 @@ package com.study.ktor.plugins.route
 
 import com.study.ktor.plugins.result.UserSignupResult
 import com.study.ktor.plugins.route.model.UserSignup
+import com.study.ktor.repository.SessionsRepository
 import com.study.ktor.repository.UsersRepository
 import io.ktor.application.*
 import io.ktor.http.*
@@ -42,8 +43,12 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.signup() {
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.handleSignupResult(result: UserSignupResult) {
     when (result) {
-        is UserSignupResult.UserSignupSuccess -> call.respond(HttpStatusCode.Created)
+        is UserSignupResult.UserSignupSuccess -> {
+            SessionsRepository.createSession(result.id)
+            call.respond(HttpStatusCode.Created)
+        }
         is UserSignupResult.UserAlreadySignedUp -> userAlreadySignedUp()
         is UserSignupResult.SignupFailed -> signupFailed()
     }
 }
+
