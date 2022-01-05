@@ -36,7 +36,7 @@ object UsersRepository {
                         it[firstName] = userSignup.firstName
                         it[secondName] = userSignup.secondName
                         it[email] = userSignup.email
-                        it[password] = userSignup.password
+                        it[password] = Cryptography.sha512(userSignup.password)
                     }
                 }
             } catch (exception: IllegalStateException) {
