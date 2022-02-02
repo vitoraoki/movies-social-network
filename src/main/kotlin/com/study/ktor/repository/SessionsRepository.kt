@@ -1,6 +1,6 @@
 package com.study.ktor.repository
 
-import com.study.ktor.plugins.result.UserSignupResult
+import com.study.ktor.plugins.result.SessionResult
 import com.study.ktor.repository.configuration.DRIVER
 import com.study.ktor.repository.configuration.PASSWORD
 import com.study.ktor.repository.configuration.URL
@@ -24,21 +24,29 @@ object SessionsRepository {
         }
     }
 
-    fun createSession(userId: Int) {
-        try {
+    fun createSession(userId: Int): SessionResult {
+        return try {
+            val token = generateToken()
+            val expiresAt = getExpiresAtDate()
+
             transaction {
                 Sessions.insert {
                     it[this.userId] = userId
-                    it[token] = UUID.randomUUID().toString()
-                    it[expiresAt] = LocalDateTime.now(ZoneOffset.UTC)
-                        .plusDays(TOKEN_VALIDITY_IN_DAYS)
-                        .atZone(ZoneOffset.UTC)
-                        .toInstant()
-                        .toEpochMilli()
+                    it[this.token] = token
+                    it[this.expiresAt] = expiresAt
                 }
             }
+            SessionResult.CreateSessionSuccess(token = token, expiresAt = expiresAt)
         } catch (exception: IllegalStateException) {
-            UserSignupResult.SignupFailed
+            SessionResult.CreateSessionFailed
         }
     }
+
+    private fun generateToken() = UUID.randomUUID().toString()
+
+    private fun getExpiresAtDate() = LocalDateTime.now(ZoneOffset.UTC)
+        .plusDays(TOKEN_VALIDITY_IN_DAYS)
+        .atZone(ZoneOffset.UTC)
+        .toInstant()
+        .toEpochMilli()
 }
