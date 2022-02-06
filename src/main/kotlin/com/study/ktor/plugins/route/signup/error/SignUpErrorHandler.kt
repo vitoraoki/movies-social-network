@@ -5,6 +5,13 @@ import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.util.pipeline.*
 
+internal suspend fun PipelineContext<Unit, ApplicationCall>.wrongUserSignUpBody() {
+    call.respond(
+        status = HttpStatusCode.BadRequest,
+        message = "Error to SignUp user"
+    )
+}
+
 internal suspend fun PipelineContext<Unit, ApplicationCall>.userAlreadySignedUp() {
     call.respond(
         status = HttpStatusCode.Conflict,
@@ -12,16 +19,9 @@ internal suspend fun PipelineContext<Unit, ApplicationCall>.userAlreadySignedUp(
     )
 }
 
-internal suspend fun PipelineContext<Unit, ApplicationCall>.signupFailed() {
+internal suspend fun PipelineContext<Unit, ApplicationCall>.signUpFailed() {
     call.respond(
         status = HttpStatusCode.ExpectationFailed,
-        message = "Error to Signup user"
-    )
-}
-
-internal suspend fun PipelineContext<Unit, ApplicationCall>.wrongUserSignupBody() {
-    call.respond(
-        status = HttpStatusCode.BadRequest,
-        message = "Error to Signup user"
+        message = "Error to SignUp user"
     )
 }
