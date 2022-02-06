@@ -1,4 +1,4 @@
-package com.study.ktor.plugins.result
+package com.study.ktor.plugins.route.session.result
 
 sealed class SessionResult {
     data class CreateSessionSuccess(

@@ -1,6 +1,6 @@
 package com.study.ktor.repository
 
-import com.study.ktor.plugins.result.SessionResult
+import com.study.ktor.plugins.route.session.result.SessionResult
 import com.study.ktor.repository.configuration.DRIVER
 import com.study.ktor.repository.configuration.PASSWORD
 import com.study.ktor.repository.configuration.URL

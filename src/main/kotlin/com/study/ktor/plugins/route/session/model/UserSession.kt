@@ -1,4 +1,4 @@
-package com.study.ktor.plugins.route.model
+package com.study.ktor.plugins.route.session.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

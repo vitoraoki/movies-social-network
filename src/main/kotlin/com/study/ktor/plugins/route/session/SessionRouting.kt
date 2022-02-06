@@ -1,7 +1,8 @@
-package com.study.ktor.plugins.route
+package com.study.ktor.plugins.route.session
 
-import com.study.ktor.plugins.result.SessionResult
-import com.study.ktor.plugins.route.model.UserSession
+import com.study.ktor.plugins.route.session.result.SessionResult
+import com.study.ktor.plugins.route.session.model.UserSession
+import com.study.ktor.plugins.route.signup.error.signupFailed
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.response.*
