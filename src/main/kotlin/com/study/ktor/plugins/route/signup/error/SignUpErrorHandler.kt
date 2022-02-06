@@ -1,4 +1,4 @@
-package com.study.ktor.plugins.route
+package com.study.ktor.plugins.route.signup.error
 
 import io.ktor.application.*
 import io.ktor.http.*
