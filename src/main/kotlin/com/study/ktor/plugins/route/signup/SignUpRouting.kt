@@ -1,11 +1,11 @@
 package com.study.ktor.plugins.route.signup
 
 import com.study.ktor.plugins.route.signup.result.UserSignUpResult
-import com.study.ktor.plugins.route.session.handleCreateSessionResult
+import com.study.ktor.plugins.route.session.handleSessionResult
 import com.study.ktor.plugins.route.signup.model.UserSignUp
-import com.study.ktor.plugins.route.signup.error.signupFailed
+import com.study.ktor.plugins.route.signup.error.signUpFailed
 import com.study.ktor.plugins.route.signup.error.userAlreadySignedUp
-import com.study.ktor.plugins.route.signup.error.wrongUserSignupBody
+import com.study.ktor.plugins.route.signup.error.wrongUserSignUpBody
 import com.study.ktor.repository.SessionsRepository
 import com.study.ktor.repository.UsersRepository
 import io.ktor.application.*
@@ -19,7 +19,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.signUp() {
         val result = UsersRepository.signUpUser(userSignup)
         handleSignupResult(result)
     } catch (exception: SerializationException) {
-        wrongUserSignupBody()
+        wrongUserSignUpBody()
     }
 }
 
@@ -27,9 +27,9 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.handleSignupResult(us
     when (userSignupResult) {
         is UserSignUpResult.UserSignUpSuccess -> {
             val createSessionResult = SessionsRepository.createSession(userSignupResult.id)
-            handleCreateSessionResult(userSignupResult.id, createSessionResult)
+            handleSessionResult(userId = userSignupResult.id, sessionResult = createSessionResult)
         }
         is UserSignUpResult.UserAlreadySignedUp -> userAlreadySignedUp()
-        is UserSignUpResult.SignUpFailed -> signupFailed()
+        is UserSignUpResult.SignUpFailed -> signUpFailed()
     }
 }
