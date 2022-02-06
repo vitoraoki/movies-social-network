@@ -1,6 +1,7 @@
 package com.study.ktor.repository
 
 import com.study.ktor.plugins.route.signin.model.UserSignIn
+import com.study.ktor.plugins.route.signin.result.UserSignInResult
 import com.study.ktor.plugins.route.signup.result.UserSignUpResult
 import com.study.ktor.plugins.route.signup.model.UserSignUp
 import com.study.ktor.repository.configuration.DRIVER
@@ -9,6 +10,7 @@ import com.study.ktor.repository.configuration.URL
 import com.study.ktor.repository.configuration.USER_DATABASE
 import com.study.ktor.repository.model.User
 import com.study.ktor.repository.table.Users
+import com.study.ktor.repository.table.Users.toUser
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -21,7 +23,7 @@ object UsersRepository {
     }
 
     fun getAllUsers(): List<User> = transaction {
-        Users.selectAll().map { Users.toUser(it) }
+        Users.selectAll().map { it.toUser() }
     }
 
     fun signUpUser(userSignup: UserSignUp): UserSignUpResult {
@@ -32,13 +34,6 @@ object UsersRepository {
         } else {
             createUser(userSignup)
         }
-    }
-
-    fun singInUser(userSignIn: UserSignIn) {
-        val user = Users.select {
-            Users.email eq userSignIn.email
-        }
-        print("")
     }
 
     private fun createUser(userSignup: UserSignUp): UserSignUpResult {
@@ -61,5 +56,31 @@ object UsersRepository {
         !Users.select {
             Users.email eq email
         }.limit(1).empty()
+    }
+
+    fun singInUser(userSignIn: UserSignIn): UserSignInResult {
+        return transaction {
+            val userQueryResult = Users.select {
+                Users.email eq userSignIn.email
+            }
+
+            if (userQueryResult.count() < 1) {
+                UserSignInResult.UserNotSignedUp
+            } else {
+                verifyPassword(userQueryResult = userQueryResult, receivedPassword = userSignIn.password)
+            }
+        }
+    }
+
+    private fun verifyPassword(
+        userQueryResult: Query,
+        receivedPassword: String
+    ): UserSignInResult {
+        val user = userQueryResult.first().toUser()
+        return if (user.isPasswordCorrect(receivedPassword = receivedPassword)) {
+            UserSignInResult.UserSignInSuccess(id = user.id)
+        } else {
+            UserSignInResult.WrongPassword
+        }
     }
 }
