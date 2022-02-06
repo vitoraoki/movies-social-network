@@ -1,7 +1,8 @@
 package com.study.ktor.repository
 
-import com.study.ktor.plugins.result.UserSignupResult
-import com.study.ktor.plugins.route.model.UserSignup
+import com.study.ktor.plugins.route.signin.model.UserSignIn
+import com.study.ktor.plugins.route.signup.result.UserSignUpResult
+import com.study.ktor.plugins.route.signup.model.UserSignUp
 import com.study.ktor.repository.configuration.DRIVER
 import com.study.ktor.repository.configuration.PASSWORD
 import com.study.ktor.repository.configuration.URL
@@ -23,17 +24,24 @@ object UsersRepository {
         Users.selectAll().map { Users.toUser(it) }
     }
 
-    fun signupUser(userSignup: UserSignup): UserSignupResult {
+    fun signUpUser(userSignup: UserSignUp): UserSignUpResult {
         val isUserAlreadySignedUp = isUserAlreadySignedUp(userSignup.email)
 
         return if (isUserAlreadySignedUp) {
-            UserSignupResult.UserAlreadySignedUp
+            UserSignUpResult.UserAlreadySignedUp
         } else {
             createUser(userSignup)
         }
     }
 
-    private fun createUser(userSignup: UserSignup): UserSignupResult {
+    fun singInUser(userSignIn: UserSignIn) {
+        val user = Users.select {
+            Users.email eq userSignIn.email
+        }
+        print("")
+    }
+
+    private fun createUser(userSignup: UserSignUp): UserSignUpResult {
         return try {
             val userId = transaction {
                 Users.insertAndGetId {
@@ -43,9 +51,9 @@ object UsersRepository {
                     it[password] = Cryptography.sha512(userSignup.password)
                 }.value
             }
-            UserSignupResult.UserSignupSuccess(id = userId)
+            UserSignUpResult.UserSignUpSuccess(id = userId)
         } catch (exception: IllegalStateException) {
-            UserSignupResult.SignupFailed
+            UserSignUpResult.SignUpFailed
         }
     }
 
