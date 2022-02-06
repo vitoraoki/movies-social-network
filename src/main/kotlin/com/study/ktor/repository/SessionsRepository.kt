@@ -10,6 +10,7 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -39,6 +40,23 @@ object SessionsRepository {
             SessionResult.CreateSessionSuccess(token = token, expiresAt = expiresAt)
         } catch (exception: IllegalStateException) {
             SessionResult.CreateSessionFailed
+        }
+    }
+
+    fun updateSession(userId: Int): SessionResult {
+        return try {
+            val token = generateToken()
+            val expiresAt = getExpiresAtDate()
+
+            transaction {
+                Sessions.update({ Sessions.userId eq userId }) {
+                    it[this.token] = token
+                    it[this.expiresAt] = expiresAt
+                }
+            }
+            SessionResult.UpdateSessionSuccess(token = token, expiresAt = expiresAt)
+        } catch (exception: IllegalStateException) {
+            SessionResult.UpdateSessionFailed
         }
     }
 

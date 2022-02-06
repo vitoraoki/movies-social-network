@@ -6,5 +6,11 @@ sealed class SessionResult {
         val expiresAt: Long
     ): SessionResult()
 
+    data class UpdateSessionSuccess(
+        val token: String,
+        val expiresAt: Long
+    ): SessionResult()
+
     object CreateSessionFailed: SessionResult()
+    object UpdateSessionFailed: SessionResult()
 }
