@@ -9,8 +9,6 @@ import io.ktor.routing.*
 
 private const val USER_PATH = "/user"
 private const val ALL_PATH = "all"
-private const val ID = "id"
-private const val ID_PARAMETER = "{$ID}"
 private const val SIGN_UP_USER_PATH = "/sign_up"
 private const val SIGN_IN_USER_PATH = "/sign_in"
 
