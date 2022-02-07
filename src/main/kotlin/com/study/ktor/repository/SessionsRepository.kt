@@ -1,21 +1,18 @@
 package com.study.ktor.repository
 
+import com.study.ktor.plugins.route.session.model.SessionValidateData
 import com.study.ktor.plugins.route.session.result.SessionResult
 import com.study.ktor.repository.configuration.DRIVER
 import com.study.ktor.repository.configuration.PASSWORD
 import com.study.ktor.repository.configuration.URL
 import com.study.ktor.repository.configuration.USER_DATABASE
+import com.study.ktor.repository.model.Session
 import com.study.ktor.repository.table.Sessions
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.insert
+import com.study.ktor.repository.util.SessionUtil.generateToken
+import com.study.ktor.repository.util.SessionUtil.getCurrentDate
+import com.study.ktor.repository.util.SessionUtil.getExpiresAtDate
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.update
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.*
-
-private const val TOKEN_VALIDITY_IN_DAYS = 5L
 
 object SessionsRepository {
     init {
@@ -60,11 +57,38 @@ object SessionsRepository {
         }
     }
 
-    private fun generateToken() = UUID.randomUUID().toString()
+    fun validateSession(sessionValidateData: SessionValidateData): SessionResult {
+        return transaction {
+            val sessionQuery = Sessions.select { Sessions.userId eq sessionValidateData.userId }
 
-    private fun getExpiresAtDate() = LocalDateTime.now(ZoneOffset.UTC)
-        .plusDays(TOKEN_VALIDITY_IN_DAYS)
-        .atZone(ZoneOffset.UTC)
-        .toInstant()
-        .toEpochMilli()
+            if (sessionQuery.count() < 1) {
+                SessionResult.SessionNotFound()
+            } else {
+                handleSessionFound(sessionQuery, sessionValidateData)
+            }
+        }
+    }
+
+    private fun handleSessionFound(
+        sessionQuery: Query,
+        sessionValidateData: SessionValidateData
+    ): SessionResult {
+        val session = Sessions.toSession(sessionQuery.first())
+
+        return if (sessionValidateData.token != session.token) {
+            SessionResult.InvalidToken()
+        } else {
+            validateSessionExpireDate(session)
+        }
+    }
+
+    private fun validateSessionExpireDate(session: Session): SessionResult {
+        val currentDate = getCurrentDate()
+
+        return if (currentDate > session.expiresAt) {
+            SessionResult.SessionExpired()
+        } else {
+            SessionResult.ValidSession
+        }
+    }
 }
