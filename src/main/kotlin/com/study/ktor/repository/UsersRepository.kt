@@ -10,7 +10,6 @@ import com.study.ktor.repository.configuration.URL
 import com.study.ktor.repository.configuration.USER_DATABASE
 import com.study.ktor.repository.model.User
 import com.study.ktor.repository.table.Users
-import com.study.ktor.repository.table.Users.toUser
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -23,16 +22,16 @@ object UsersRepository {
     }
 
     fun getAllUsers(): List<User> = transaction {
-        Users.selectAll().map { it.toUser() }
+        Users.selectAll().map { Users.toUser(resultRow = it) }
     }
 
     fun signUpUser(userSignup: UserSignUp): UserSignUpResult {
-        val isUserAlreadySignedUp = isUserAlreadySignedUp(userSignup.email)
+        val isUserAlreadySignedUp = isUserAlreadySignedUp(email = userSignup.email)
 
         return if (isUserAlreadySignedUp) {
             UserSignUpResult.UserAlreadySignedUp
         } else {
-            createUser(userSignup)
+            createUser(userSignup = userSignup)
         }
     }
 
@@ -43,7 +42,7 @@ object UsersRepository {
                     it[firstName] = userSignup.firstName
                     it[secondName] = userSignup.secondName
                     it[email] = userSignup.email
-                    it[password] = Cryptography.sha512(userSignup.password)
+                    it[password] = Cryptography.sha512(input = userSignup.password)
                 }.value
             }
             UserSignUpResult.UserSignUpSuccess(id = userId)
@@ -76,7 +75,7 @@ object UsersRepository {
         userQueryResult: Query,
         receivedPassword: String
     ): UserSignInResult {
-        val user = userQueryResult.first().toUser()
+        val user = Users.toUser(resultRow = userQueryResult.first())
         return if (user.isPasswordCorrect(receivedPassword = receivedPassword)) {
             UserSignInResult.UserSignInSuccess(id = user.id)
         } else {
