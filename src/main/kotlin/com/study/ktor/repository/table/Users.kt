@@ -17,11 +17,11 @@ object Users: IntIdTable(TABLE_NAME) {
     val email: Column<String> = text(COLUMN_EMAIL)
     val password: Column<String> = text(COLUMN_PASSWORD)
 
-    fun ResultRow.toUser(): User = User(
-        id = this[id].value,
-        firstName = this[firstName],
-        secondName = this[secondName],
-        email = this[email],
-        password = this[password]
+    fun toUser(resultRow: ResultRow): User = User(
+        id = resultRow[id].value,
+        firstName = resultRow[firstName],
+        secondName = resultRow[secondName],
+        email = resultRow[email],
+        password = resultRow[password]
     )
 }
