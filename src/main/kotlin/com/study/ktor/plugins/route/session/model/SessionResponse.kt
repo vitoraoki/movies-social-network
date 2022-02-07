@@ -4,8 +4,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UserSession(
-    @SerialName("user_id") val userId: String,
+data class SessionResponse(
+    @SerialName("user_id") val userId: Int,
     val token: String,
     @SerialName("expires_at") val expiresAt: Long
 )
