@@ -16,7 +16,7 @@ import kotlinx.serialization.SerializationException
 suspend fun PipelineContext<Unit, ApplicationCall>.signIn() {
     try {
         val userSignIn = call.receive<UserSignIn>()
-        val result = UsersRepository.singInUser(userSignIn = userSignIn)
+        val result = UsersRepository().singInUser(userSignIn = userSignIn)
         handleSignInResult(result)
     } catch (exception: SerializationException) {
         wrongUserSignInBody()
@@ -26,7 +26,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.signIn() {
 private suspend fun PipelineContext<Unit, ApplicationCall>.handleSignInResult(userSignInResult: UserSignInResult) {
     when (userSignInResult) {
         is UserSignInResult.UserSignInSuccess -> {
-            val updateSessionResult = SessionsRepository.updateSession(userId = userSignInResult.id)
+            val updateSessionResult = SessionsRepository().updateSession(userId = userSignInResult.id)
             handleSessionResult(userId = userSignInResult.id, sessionResult = updateSessionResult)
         }
         is UserSignInResult.UserNotSignedUp -> userNotSignedUp()

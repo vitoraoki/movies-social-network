@@ -17,7 +17,7 @@ import io.ktor.util.pipeline.*
 
 suspend fun PipelineContext<Unit, ApplicationCall>.validateSession() {
     val sessionValidateData = call.receive<SessionValidateData>()
-    val result = SessionsRepository.validateSession(sessionValidateData = sessionValidateData)
+    val result = SessionsRepository().validateSession(sessionValidateData = sessionValidateData)
     handleSessionResult(userId = sessionValidateData.userId, sessionResult = result)
 }
 
