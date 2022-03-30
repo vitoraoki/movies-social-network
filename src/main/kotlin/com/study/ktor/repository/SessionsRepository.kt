@@ -14,9 +14,14 @@ import com.study.ktor.repository.util.SessionUtil.getExpiresAtDate
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
-object SessionsRepository {
+class SessionsRepository {
+    companion object {
+        fun connect() {
+            Database.connect(url = URL, driver = DRIVER, user = USER_DATABASE, password = PASSWORD)
+        }
+    }
+
     init {
-        Database.connect(url = URL, driver = DRIVER, user = USER_DATABASE, password = PASSWORD)
         transaction {
             SchemaUtils.create(Sessions)
         }
