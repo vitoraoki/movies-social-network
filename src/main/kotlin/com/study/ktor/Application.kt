@@ -17,6 +17,7 @@ fun main() {
 private fun Application.module() {
     configureSerialization()
     configureSockets()
+    connectDatabases()
     configureRouting()
 }
 
