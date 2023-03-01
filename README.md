@@ -5,4 +5,4 @@ Project to study backend and ktor concepts
 Ktor, Exposed, PostgreSQL, Docker Compose
 
 # Progress
-Currently developed a signup/signin system
+Currently developed a signup/signin and session management system
